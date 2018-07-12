@@ -1,0 +1,398 @@
+
+Step 1) Login to Root
+
+
+#sudo -i
+
+
+
+Step 2) Update the System
+
+
+#apt-get update
+
+
+
+Step 3: Installation of OpenSSH Server
+
+
+#apt-get install openssh-server
+
+
+
+Step 4: make copy of sshd_config as it will be updated. sshd_config is for server, ssh_config is for client
+
+
+#cp /etc/ssh/sshd_config /etc/ssh/sshd_config.factory-defaults
+
+Step 
+
+5: edit sshd_config
+
+
+
+5a
+
+#gedit /etc/ssh/sshd_config
+
+
+
+5b Disable password authentication by changing this line in the 
+configuration file 
+"#PasswordAuthentication" yes to "PasswordAuthentication no".
+
+# 
+Change to no to disable tunnelled clear text passwords
+#PasswordAuthentication yes --> PasswordAuthentication no
+
+5c Add the following Lines to the End: 
+
+Note: "uppal" to be replaced by "user" 
+
+name
+
+AllowUsers uppal
+
+PermitRootLogin no
+
+PubkeyAuthentication yes
+
+
+
+5d Change LogLevel INFO to LogLevel VERBOSE.
+
+
+
+5e Take a snapshot for assignment and type in cmd
+
+#clear
+
+
+
+5f Save and Restart SSH
+
+
+#systemctl restart ssh
+
+Step 
+
+6: A password would be required every time Hadoop interacts. so below steps to save time
+
+
+6a Login with user
+
+#su - uppal
+
+
+
+6b note: we should be in user
+
+#ssh-keygen -t rsa -P ""
+
+Press Enter
+
+
+
+6c . note: we should be in user
+
+#cat $HOME/.ssh/id_rsa.pub >> $HOME/.ssh/authorized_keys
+
+
+
+6e Test ssh
+
+#clear
+
+#ssh localhost
+
+
+
+6f Take a snapshot for Assignment
+
+
+
+=========================================================================================================
+PART B
+
+
+Step 1: Addding Java:
+
+1a : Login to root
+
+#su -i
+
+
+
+1b
+
+#add-apt-repository ppa:webupd8team/java --> Press Enter
+
+#apt-get update
+
+#apt-get install oracle-java8-installer
+
+
+
+1c: check java version after installation
+
+#java -version
+
+
+=========================================================================================================
+INSTALL HADOOP
+
+
+
+Step 2:
+
+
+
+2a Login to user:
+
+#sudo - uppal
+
+
+
+2b
+
+cd Desktop
+
+
+
+2c : Unzip hadoop 2.7.5 placed in desktop
+
+#sudo tar xzvf hadoop-2.7.5.tar.gz
+
+
+
+2d: 
+#
+sudo mv hadoop-2.7.5 /usr/local/hadoop
+
+2e:
+sudo chown -R uppal /usr/local/hadoop
+
+
+
+Step 3:
+
+3a check where java is installed:
+
+#readlink -f /usr/bin/java
+
+
+Comment: The path should match java path file in 3b: "JAVA_HOME
+
+
+
+3b edit bashrc file
+
+
+#gedit ~/.bashrc
+
+
+Type following in bashrc file
+
+export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+
+export HADOOP_INSTALL=/usr/local/hadoop/hadoop-2.7.5
+
+export PATH=$PATH:$HADOOP_INSTALL/bin
+
+export PATH=$PATH:$HADOOP_INSTALL/sbin
+
+export HADOOP_MAPRED_HOME=$HADOOP_INSTALL
+
+export HADOOP_COMMON_HOME=$HADOOP_INSTALL
+
+export HADOOP_HDFS_HOME=$HADOOP_INSTALL
+
+export YARN_HOME=$HADOOP_INSTALL
+
+export HADOOP_COMMON_LIB_NATIVE_DIR=$HADOOP_INSTALL/lib/native
+
+export HADOOP_OPTS="-Djava.library.path=$HADOOP_INSTALL/lib/native"
+
+
+
+3c:
+
+#source ~/.bashrc
+
+
+
+Step 4: Exporting JAVA_HOME path
+
+4a
+
+#cd /usr/local/hadoop/hadoop-2.7.5/etc/hadoop
+
+
+
+4b
+
+#nano hadoop-env.sh
+
+
+EDIT
+
+export JAVA_HOME=${JAVA_HOME} --> export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+
+
+
+Step 5: Create a directory that will be base for temp directories
+
+
+5a
+
+#sudo mkdir -p /app/hadoop/tmp
+
+#sudo chown uppal /app/hadoop/tmp
+
+
+
+===================================================================================================
+PART C: Editing the XML Based Hadoop Configuration Files
+
+
+
+Step 1:All the Hadoop configuration files reside under usr/local/hadoop/hadoop-2.7.5/etc/hadoop
+
+
+
+1a
+
+#cd /usr/local/hadoop/hadoop-2.7.5/etc/hadoop
+#
+ls
+
+
+
+1b Edit Core-site.xml: Insert below information between <configured> </configuration> at the end of file
+#
+
+nano core-site.xml
+
+
+<property>
+
+	<name>fs.default.name</name>
+
+	<value>hdfs://localhost:9000</value>
+</property>
+
+
+1c Edit mapred-site.xml
+
+#cp /usr/local/hadoop/hadoop-2.7.5/etc/hadoop/mapred-site.xml.template /usr/local/hadoop/hadoop-2.7.5/etc/hadoop/mapred-site.xml
+
+#
+nano mapred-site.xml
+
+
+<property>
+
+<name>mapred.job.tracker</name>
+
+<value>localhost:9001</value>
+
+</property>
+
+<property>
+<name>mapreduce.framework.name</name>
+<value>yarn</value>
+</property>
+
+
+
+1d: Edit yarn-site.xml
+
+#nano yarn-site.xml
+
+
+<property>
+<name>yarn.nodemanager.aux-services</name>
+<value>mapreduce_shuffle</value>
+</property>
+
+<property>
+<name>yarn.nodemanager.aux-services.mapreduce.shuffle.class</name>
+<value>org.apache.hadoop.mapred.ShuffleHandler</value>
+</property>
+
+
+
+========================================================================================
+PART D 
+The hdfs-site.xml is used to specify the namenode and datanode directories
+
+
+Step 1: Create Directories
+
+#sudo mkdir -p /usr/local/hadoop_store/hdfs/namenode
+
+#sudo mkdir -p /usr/local/hadoop_store/hdfs/datanode
+
+#sudo chown -R uppal /usr/local/hadoop_store
+
+
+
+Step 2: Modify hdfs-site.xml
+#
+nano hdfs-site.xml
+
+
+<property>
+<name>dfs.replication</name>
+<value>4</value>
+</property>
+
+<property>
+<name>dfs.namenode.name.dir</name>
+<value> file:/usr/local/hadoop_store/hdfs/namenode </value>
+</property>
+
+<property>
+<name>dfs.datanode.data.dir</name>
+<value> file:/usr/local/hadoop_store/hdfs/datanode </value>
+</property>
+
+
+======================================================================
+PART E: Format to initialize the file system
+
+
+
+Step 1:
+
+#hdfs namenode -format
+
+
+
+Step 2: Start the single node cluster
+
+#start-dfs.sh
+
+#start-yarn.sh
+
+#jps
+
+#ifconfig
+
+
+
+http://10.0.2.15:8088
+
+
+
+Step3: Open the Web Browser
+
+http://ipaddress:8088 (Main Cluster)
+
+http://ipaddress:50070 (Detailed Information)
+
+
+
+
+For Hadoop 3/0
+9870 for detailed information

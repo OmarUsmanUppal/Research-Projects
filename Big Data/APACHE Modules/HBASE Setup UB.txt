@@ -1,0 +1,155 @@
+Video to Demonstrate Step by Step Installation of Apache HBase 1.1.7 on Apache 2.7.0 Single Node Cluster on Ubuntu 16.04
+
+https://www.youtube.com/watch?v=Aid-BNWvlYw&feature=youtu.be
+
+Step to Install Apache Hbase on Ubuntu 16.04 are as follows:
+
+Before Installing Apache HBASE- Make sure of the
+following Pre-Requisite Installations
+
+1. Ubuntu 16.04
+2. Java-1.8
+3. Hadoop 2.7.0 (Minimum)
+
+Steps to Install Apache HBASE on Ubuntu 16.04
+
+Before Installations make sure of following commands
+to run before starting the installation
+
+============================================================
+Step -2 Be in Local User
+#sudo - uppal
+
+Step -1 Restart SSH Service
+#service sshd restart
+
+Step 1. Restart Apache Hadoop (In Case of Server Restart)
+#cd /usr/local/hadoop/hadoop-2.7.5/sbin
+#./start-all.sh
+#jps
+
+NOTE: MAKE SURE HADOOP IS RUNNING BEFORE STARTING HBASE installation
+else it wont work
+
+2. Download HBASE from the following Link
+http://www.eu.apache.org/dist/hbase/
+Download the latest version: 1.1.7
+http://www.eu.apache.org/dist/hbase/1.1.7/
+File: hbase-1.1.7-bin.tar.gz
+
+3. Login with User-Other than root in which
+you have installed Apache Hadoop
+#su uppal
+
+4. Unzip the file
+# cd Desktop
+#tar -xvf hbase-1.2.6-bin.tar.gz
+
+5. Create Directory
+#sudo mkdir /usr/lib/hbase
+
+6. Move Hbase-1.1.7 to hbase
+#sudo mv hbase-1.2.6 /usr/lib/hbase/hbase-1.2.6
+
+7. Open the Conf files and modify the following:
+#cd /usr/lib/hbase/hbase-1.2.6
+#ls
+#cd conf
+#nano hbase-env.sh
+
+Edit the following
+#export JAVA_HOME=/usr/java/jdk1.6.0/ --> 
+	export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+export JAVA_HOME=/usr/lib/jvm/java-8-oracle
+export HBASE_REGIONSERVERS=/usr/lib/hbase/hbase-1.2.6/conf/regionservers
+export HBASE_MANAGES_ZK=true
+(UNCOMMENT THE ABOVE)
+
+8. Edit bashrc
+#nano ~/.bashrc
+
+export HBASE_HOME=/usr/lib/hbase/hbase-1.2.6
+
+export PATH=$PATH:$HBASE_HOME/bin
+
+NOTE: Just paste last two lines at the end of bashrc file as we did for Hadoop
+
+#source ~/.bashrc
+
+9. Edit hbase-site.xml
+#cd /usr/lib/hbase/hbase-1.2.6
+#cd conf
+#nano hbase-site.xml	
+
+<property>
+
+<name>hbase.rootdir</name>
+
+<value>hdfs://localhost:9000/hbase</value>
+
+</property>
+
+<property>
+
+<name>hbase.cluster.distributed</name>
+
+<value>true</value>
+
+</property>
+
+<property>
+
+<name>hbase.zookeeper.quorum</name>
+
+<value>localhost</value>
+
+</property>
+
+<property>
+
+<name>dfs.replication</name>
+
+<value>1</value>
+
+</property>
+
+<property>
+
+<name>hbase.zookeeper.property.clientPort</name>
+
+<value>2181</value>
+
+</property>
+
+<property>
+
+<name>hbase.zookeeper.property.dataDir</name>
+
+<value>/home/uppal/hbase/zookeeper</value>
+
+</property>
+
+Save the file and exit
+
+10. Start HBASE
+
+# cd ..
+# cd bin
+# ls --> it should contain start-hbase.sh	
+#./start-hbase.sh
+
+#jps
+NOTE: jps will have more results than we did it for hadoop
+#clear
+#./hbase shell
+
+#status
+#status 'simple'
+#status 'summary'
+#status 'detailed'
+#version
+#whoami
+#exit
+#ifconfig
+Open the Web Interface
+http://ipaddress:16010/master-status

@@ -1,0 +1,586 @@
+---
+#title:  "A2-Omar203515"
+#author: "Omar Usman Uppal"
+#CMS ID: "203515"
+#output: pdf_document#
+---
+#           NAME: OMAR USMAN UPPAL
+#           CMS ID: 203515
+#           ASSIGNMENT 2
+#     CS823 Advance Topics in Databases [Big Data Analytics}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+
+
+# SECTION 1. HOW TO LOAD DATA IN R#
+In the field of data science and big data there are two common types of data formats that we use to load DATA in R.
+
+1. Load Data from Files
+
+2. Load Data from Relational Databases
+
+In this section we will focus on the first type only.
+
+## 1.1 LOAD DATA FROM FILES#
+
+#### 1.1.1 EXAMPLE 1:#
+In this example the data we will use has two important points.
+
+1. Data is read from the URL
+2. Data is well-structured
+
+#####READ DATA
+
+"read.table" is an R command used to read the data from different sources. It can read the data from the files stored on the system as well as directly from the urls.
+
+```{r}
+cardata <- read.table('http://www.win-vector.com/dfiles/car.data.csv',
+sep=',',header=T)
+```
+
+#####EXAMINE DATA
+
+Now, the data is loaded in data frame object --cardata-- we will apply different R commands to examine the data.
+
+```{r}
+class(cardata)
+```
+**class()** commands gives information about the type of R object which in this case is **"data.frame"**
+```{r}
+dim(cardata)
+```
+**dim()** commands gives information about the dimenstion of the data i.e., the number of rows and number of columns which in this case is **"1728 rows and 7 columns"**
+```{r}
+summary(cardata)
+```
+**summary()** commands is used to get summary of almost any R object. In this case the **summary(cardata)** gives information about the **distribution** of the data.
+
+```{r}
+summary(cardata$buying)
+```
+
+**summary(cardata$buying)** command can be used to get information about the specific column by provding it arguments. In this case the the command shows the distribtuion of specific column _buying_.
+
+
+**help** command gives documentation of a class. Using **help(class(cardata)** shows the helpful information in the side window.
+
+#####EXAMPLE 1 SUMMARY
+After executing different commands above, the information we get from the output can be summarized in below points.
+
+* 7 columns have the headins that help us understand about the information in the columns
+* Each car in the dataset have 2, 3, 4 or 5more doors. We have to understand what 5more means? Does it mean 5 or more doors?
+  + 432 cars are 2 doors
+  + 432 cars are 3 doors
+* Each car in the dataset can seat 2, 4 or more persons.
+  + 576 cars are 4-seaters
+* Similary other columns _'buying', 'maint', 'lug-boot', 'safety', 'rating'_ also provide information about the dataset that we can sue for further analysis.
+
+
+
+####1.1.2 EXAMPLE 2:
+In this example the data we will use has two important points.
+
+1. Data is read from the file stored in the system
+2. Data is Less-structured
+
+#####READ DATA
+
+We will read data from the _file(german.data)_ placed in local folder _C:/MyRwork/Big Data_. The file is downloaded from the github link [https://github.com/WinVector/zmPDSwR/tree/master/Statlog](/url).
+
+To read the data first we will set the working directory to folder where our file is placed. Than we will use the read.table() command to load the data into our data frame object.
+
+```{r}
+setwd("D:/GitHub/Research-Projects/Big Data/R Working")
+creditdata <- read.table('german.data',sep='',stringsAsFactors=F,header=F)
+```
+
+*creditdata* is the new data frame object that now contains the data read from the file.
+
+#####EXAMINE DATA
+Now we will execute the three commands as we did in Example 1 and see what information we get from it.
+
+```{r}
+class(creditdata)
+dim(creditdata)
+summary(creditdata)
+```
+
+*class()* and *dim()* commands show that our object is of type _data.frame_ with dimensions of _1000 rows x 21 columns_. However the exection of *summary* commands shows the distribution but we cannot get the information what it actually means. The data is an incomprehensible block of codes with no meaningful
+explanations.
+
+Hence we will introduce another step here before we can *EXAMINE THE DATA*.
+
+#####TRANSFORM DATA
+This data is stored as tabular data without headers; it uses a cryptic encoding of values that requires the dataset's accompanying documentation to untangle.
+Details of the German bank credit dataset can be found at [http://mng.bz/mZbu](/url).
+
+We will start by printing the first 3 rows of the dataset.
+```{r}
+print(creditdata[1:3,])
+```
+We can notice that we get the exact same three rows we saw in the _german.data_ file with the addition of column names V1 through V21. We can change the column names to something meaningful using the detail available on the dataset link.
+
+```{r }
+colnames(creditdata) <- c('Status.of.existing.checking.account',
+                 'Duration.in.month', 'Credit.history', 'Purpose',
+                 'Credit.amount', 'Savings account/bonds',
+                 'Present.employment.since','Installment.rate.in.percentage.of.disposable.income',
+                 'Personal.status.and.sex', 'Other.debtors/guarantors',
+                 'Present.residence.since', 'Property', 'Age.in.years',
+                 'Other.installment.plans', 'Housing',
+                 'Number.of.existing.credits.at.this.bank', 'Job',
+                 'Number.of.people.being.liable.to.provide.maintenance.for',
+                 'Telephone', 'foreign.worker', 'Good.Loan')
+
+creditdata$Good.Loan <- as.factor(ifelse(creditdata$Good.Loan==1,'GoodLoan','BadLoan'))
+
+print(creditdata[1:3,])
+```
+
+
+**colnames** command is used to change the column names and we can see that they are now giving information about the data in the respective columns.
+
+**creditdata\$Good.Loan** means that want to do some operation on our data frame object **creditdata** and specifically its column 21 which we renamed to **Good.Loan**. In the single line of code in which **creditdata\$Good.Loan** has been assigned new values following operations were done.
+
+* 1 in the column was replaced with "GoodLoan" while 0 was replaced with "BadLoad"
+* Once all the values were replaced the **creditdata\$Good.Loan** object type encoded to _factor_.
+
+Comparing the result of *print(creditdata[1:3,])* with earlier results we can see the change in the last column which shows meaningful explanation.
+
+
+#####MAPPING FUNCTION FOR A-* CODES
+Reading the data documentation further tells us that it has a dictionary of the meanings of all of the cryptic A\* codes. For example, it says in column 4 (now called Purpose, meaning the purpose of the loan) that the code A40 is a new car loan, A41 is a used car loan, and so on. We will create a mapping list that we will use to replace A\* codes with their meanings.
+
+```{r}
+mapping <- list('A11'='... < 0 DM',
+ 'A12'='0 <= ... < 200 DM',
+ 'A13'='... >= 200 DM / salary assignments for at least 1 year',
+ 'A14'='no checking account',
+ 'A30'='no credits taken/all credits paid back duly',
+ 'A31'='all credits at this bank paid back duly',
+ 'A32'='existing credits paid back duly till now',
+ 'A33'='delay in paying off in the past',
+ 'A34'='critical account/other credits existing (not at this bank)',
+ 'A40'='car (new)',
+ 'A41'='car (used)',
+ 'A42'='furniture/equipment',
+ 'A43'='radio/television',
+ 'A44'='domestic appliances',
+ 'A45'='repairs',
+ 'A46'='education',
+ 'A47'='(vacation - does not exist?)',
+ 'A48'='retraining',
+ 'A49'='business',
+ 'A410'='others',
+ 'A61'='... < 100 DM',
+ 'A62'='100 <= ... < 500 DM',
+ 'A63'='500 <= ... < 1000 DM',
+ 'A64'='.. >= 1000 DM',
+ 'A65'='unknown/ no savings account',
+ 'A71'='unemployed',
+ 'A72'='... < 1 year',
+ 'A73'='1 <= ... < 4 years',
+ 'A74'='4 <= ... < 7 years',
+ 'A75'='.. >= 7 years',
+ 'A91'='male : divorced/separated',
+ 'A92'='female : divorced/separated/married',
+ 'A93'='male : single',
+ 'A94'='male : married/widowed',
+ 'A95'='female : single',
+ 'A101'='none',
+ 'A102'='co-applicant',
+ 'A103'='guarantor',
+ 'A121'='real estate',
+ 'A122'='if not A121 : building society savings agreement/life insurance',
+ 'A123'='if not A121/A122 : car or other, not in attribute 6',
+ 'A124'='unknown / no property',
+ 'A141'='bank',
+ 'A142'='stores',
+ 'A143'='none',
+ 'A151'='rent',
+ 'A152'='own',
+ 'A153'='for free',
+ 'A171'='unemployed/ unskilled - non-resident',
+ 'A172'='unskilled - resident',
+ 'A173'='skilled employee / official',
+ 'A174'='management/ self-employed/highly qualified employee/ officer',
+ 'A191'='none',
+ 'A192'='yes, registered under the customers name',
+ 'A201'='yes',
+ 'A202'='no')
+```
+**lists** is R's structure that maps strings to arbitrary objects. In the next line of code we will use the **mapping** structure to replace the A\* codes in the data frame object **creditdata**
+
+```{r}
+for(i in 1:(dim(creditdata))[2]) {
+if(class(creditdata[,i])=='character') {
+creditdata[,i] <- as.factor(as.character(mapping[creditdata[,i]]))
+}
+}
+```
+
+Above lines of codes were the last step of **TRANSFORM DATA** step. Once the complete code is executed we will have transformed data in the rows of **creditdata** object. Following actions were done in the above lines of code.
+
+* for loop is executed 21 times
+* IF the class type of the column is **character** than A\* codes are mapped with he meaning.
+* Object type is encoded to type **factor**.
+* Changes are stored back to **creditdata**
+
+#####EXAMINE THE TRANSFORMED DATA
+We can now easily examine the purpose of the first three loans with the command
+print(creditdata[1:3,'Purpose']). The purpose of first three loans can be seen plus additional information that there are 10 differents purposes of loan in the given dataset.
+
+```{r}
+print(creditdata[1:3,'Purpose'])
+```
+
+```{r}
+summary(creditdata$Purpose)
+```
+
+**summary(creditdata$Purpose)** is used to find the distribution of loan purpose.
+
+We can also start to investigate the relation of loan type to other attributes as shown in the final two listings.
+
+```{r}
+table(creditdata$Credit.history,creditdata$Good.Loan)
+```
+The above command shows relationship between _"Credit.history"_ and _"Good.Loan"_
+
+Similarly the command below shows relationship between _"Personal.status.and.sex"_ and _"Good.Loan"_. The table shows that 146 single males contribute to bad loans while 402 single males contribute to Good Loans which makes approx 1:3.
+```{r}
+table(creditdata$Personal.status.and.sex,creditdata$Good.Loan)
+```
+
+
+
+
+
+# SECTION 2. EXPLORE DATA IN R#
+In this section we will use different techniques to explore data. For this section we will use another dataset known as **custdata** placed at [https://github.com/WinVector/
+zmPDSwR/tree/master/Custdata](/url). We have placed the file in our working directory and we will read from there.
+
+## 2.1 USING SUMMARY STATISTICS TO SPOT PROBLEMS#
+
+####2.1.1 READ DATA
+```{r}
+customerdata <- read.table('custdata.tsv',header=TRUE,sep="\t",quote="", fill=FALSE)
+```
+
+####2.1.2 EXAMINE DATA
+```{r}
+class(customerdata)
+dim(customerdata)
+summary(customerdata)
+```
+Looking at the result we get the to know that **customerdata** is a "data frame"" of size **1000x11**. Moreover all the 11 columns have well defined names that can be used to explore the data. 
+
+**summary** command provides variety of **summary statistics**(_mean, variance, median, min, max and quantile_) on the numerical columns of the data frame, and count statistics on any categorical columns.
+
+**summary** also helps in spotting the potential problems (_missing data_ or _unlikely values_) in the data.
+
+####2.1.3 Typical Problems
+The most common problems in the dataset are _missing values, invalid values and outliers_. _Data ranges_ that are too narrow or wide can also be problem. We can spot such problems as a result of **summary** command but we also use visual tools to spot time as it is not easy to detect just with reading the tabular form of the data.
+
+**_MISSING VALUES:_**
+
+* We can see that the variable _is.employed_ has _328 NA's_ which means 30% data is missing.
+* Similary three more variables, _housing.type, recent.move and num.vehicles_, have 56 missing values.
+
+**_INVALID VALUES AND OUTLIERS:_**
+
+* The variable _income_ has negative value. Can income be negative? Mean of income is 53500 but max value is 615,000 which is a very high value consider the other values of same variable.
+* The variable _age_ has age 0 as well as age 146.7 of the clients. These are unexpected values for such type of dataset and they could be outliers.
+
+**_DATA RANGE:_**
+
+* The variable _income_ has range from less than zero to more than half a million dollars. Is it a valid range or data has some error.
+
+**_UNITS:_**
+
+* The _income_ data represent yearly wages in units of $1000. We have defined a new variable _customerdata$Income_ to better understand it.
+
+```{r}
+customerdata$Income = customerdata$income/1000
+summary(customerdata$Income)
+```
+
+
+**_OBSERVATIONS:_**
+
+The observations we gathered need to be further explored. If the values are missing that what could be possible reason for it? Maybe missing values have some meaning that we can discuss with the customer. We have to decide an appropriate action regarding missing data, should we include them or delete them or convert them to some appropriate values?
+
+Similarly we have to find reaon for invalid values like negative values of income. They may also have some special meaning and than we have to take appropriate action regarding such values.
+
+
+##2.2 USING GRAPHICS and VISUALIZATION TO SPOT PROBLEMS#
+
+###2.2.1 VISUALIZATION OF SINGLE VARIABLE
+
+**_HISTOGRAM_**
+
+
+```{r }
+library(ggplot2)
+ggplot(customerdata) + geom_histogram(aes(x=age), binwidth=5, fill="grey")+
+  scale_x_continuous(breaks = seq(0,160,10)) + scale_y_continuous(breaks = seq(0,220,10))
+```
+
+* Binwidth parameter tells the geom_histogram call to make bins of 5 years. Histogram of variable _age_ shows that there are outliers in the data.
+* One of the disadvantage of Histogram is that we have to set bin size in advance and it may not reflect the true information.
+
+**_DENSITY PLOTS_**
+
+_Density plots_ can be thought of as "continous histogram" of a variable. The area under the density plot is equal to 1. We will plot the data of _income_ variable in this case.
+
+```{r}
+library(scales)
+ggplot(customerdata) + geom_density(aes(x=income)) + scale_x_continuous(labels=dollar) +
+   scale_y_continuous(labels=comma)
+
+```
+
+* Graph shows the distribution is concentrated at low end and so it is positively skewed. We use Density plots to see the overall shape of the curve.
+
+
+**_BAR CHART_**
+
+```{r}
+ggplot(customerdata) + geom_bar(aes(x=marital.stat), fill="cadetblue")
+```
+
+In the above bar graph we can see 4 caterogies of _martial.stat_ on horizontal x-axis while _frequency_ of each category on the vertical x-axis
+
+**_BOX PLOT_**
+
+```{r}
+boxplot(customerdata$age)
+```
+
+The box plot shows the median, minimum, maximum , first quartile, third quartile values of the age variable.
+
+
+## 2.2.2 VISUALIZATION OF RELATION BETWEEN TWO VARIABLEs
+
+**_CORRELATION BETWEEN AGE AND INCOME_**
+
+The negative correlation shows that if we increase the age than the income decreases as per the dataset.
+
+```{r}
+custdata2 <- subset(customerdata, (customerdata$age > 0 & customerdata$age < 100 & customerdata$income > 0))
+cor(custdata2$age, custdata2$income)
+```
+
+**_SCATTER PLOTS AND SMOOTHING CURVES_**
+
+```{r warning=FALSE}
+ggplot(custdata2, aes(x=age, y=income)) + geom_point() + ylim(0, 200000)
+```
+
+The scatter plot shows that income increases between the age 20-57 but it tends to decrease after the age of 57.
+
+```{r warning=FALSE}
+ggplot(custdata2, aes(x=age, y=income)) + geom_point() + geom_smooth() + ylim(0, 200000)
+```
+
+In this graph the rows with missing values are removed and it clarifies more clearly the range of age in which the income increases and than decreases.
+
+**_Plotting the distribution of health.ins as a function of age_**
+
+```{r}
+ggplot(custdata2, aes(x=age, y=as.numeric(health.ins))) + geom_point(position=position_jitter(w=0.05, h=0.05)) + geom_smooth()
+```
+
+The above scatter plot is another visualization type showing a relationship between a continuous variable(age) and a Boolean(health.ins). The smoothing curve shows the fraction of customers with health insurance, as a function of age.
+
+**_BAR CHARTS FOR TWO CATEGORICAL VARIABLES_**
+
+```{r}
+ggplot(customerdata) + geom_bar(aes(x=marital.stat, fill=health.ins))
+ggplot(customerdata) + geom_bar(aes(x=marital.stat, fill=health.ins), position="dodge")
+ggplot(customerdata) + geom_bar(aes(x=marital.stat, fill=health.ins), position="fill")
+```
+
+Different styles of bar charts are displayed. Pink color represents fraction of customers uninsured in the catergory of _martial.stat_ while blue color shows the insured customers.
+
+# SECTION 3. MANAGING DATA#
+In this section we will apply R commands to 
+
+1. Fix the data issues
+2. Organize the data for the modelling process.
+
+We will start by reading the data from a new dataset that is _example-Data.rData_ from [https://github.com/WinVector/zmPDSwR/tree/master/Custdata](\url).
+
+On executing the load command new variables are created in global environment
+```{r}
+load("exampleData.rData")
+```
+
+```{r}
+summary(custdata)
+```
+
+**_Obsevation_**
+
+* 56 missing values in variables _housing.type_, _recent.move_ and _num.vehicles_.
+* 328 missing values in _Income_ and _Is.employed_ variables.
+* The _Median.Income.y_  , _Median.Income.x_ and _Median.Income_ have same information
+
+
+##3.1 CLEANING DATA
+
+To clean the data first we will resolve the problem of missing values.
+
+
+###3.1.1 Check Location of missing data:
+
+**_56 missing values in 3 variables_**
+
+```{r}
+summary(custdata[is.na(custdata$housing.type), c("recent.move","num.vehicles")])
+```
+
+We observed that there were three variables with 56 missing values. Here we will check that are those rows the same or different. Therefore in the _is.na_ command we filter out _housing.type_ missing values and compare with variables _recent.move_ and _num.vehicles_. The result shows that the same 56 rows have missing values against the three variables.
+
+We will the drop the rows with the missing values as they are less in number and probably it is save to drop them.
+
+**_328 missing values in "is.employed"_**
+
+```{r}
+custdata$is.employed.fix <- ifelse(is.na(custdata$is.employed), "missing", ifelse(custdata$is.employed==T, "employed", "not employed"))
+summary(as.factor(custdata$is.employed.fix))
+```
+
+_is.employed_ variable has 328 missing values which is one third of the customers. Here we created a new category for the variable called **missing**. We can see in the output the new category.
+
+###3.1.2 MISSING VALUES IN NUMERIC DATA
+
+```{r}
+summary(custdata$Income)
+```
+
+In this data there are 328 missing values.
+
+###3.1.3 FILL MISSING VALUES
+
+**_If missing randomly_**
+
+Here to fill the missing values on way is to replace by mean. We assume that the customers with missing income are distributed the same way as the others so using the mean the estimate will be correct on average
+
+```{r}
+
+meanIncome <- mean(custdata$Income, na.rm=T)
+Income.fix <- ifelse(is.na(custdata$Income), meanIncome, custdata$Income)
+summary(Income.fix)
+```
+
+```{r}
+summary(custdata)
+```
+
+
+**_If missing systematically_**
+
+We convert the numeric data into categorical data in such case.
+
+First we make a vector of income ranges.
+
+```{r}
+breaks <-c(0, 10000, 50000, 100000, 250000, 1000000)
+```
+
+We Cut the data into income ranges and we include the lowest value.
+
+```{r}
+Income.groups <- cut(custdata$Income, breaks=breaks, include.lowest=T)
+summary(Income.groups)
+
+```
+
+Then
+* missing values category are given a new name as _"no income"_ and 
+* the class type is convered to factor to make them as categories.
+
+```{r}
+Income.groups <- as.character(Income.groups)
+Income.groups <- ifelse(is.na(Income.groups), "no income", Income.groups)
+summary(as.factor(Income.groups))
+```
+
+```{r include=FALSE}
+missingIncome <- is.na(custdata$Income)
+Income.fix <- ifelse(is.na(custdata$Income), 0, custdata$Income)
+```
+
+
+###3.2 DATA TRANSFORMATION#
+
+####3.2.1 Normalizing income by state
+
+_medianincome_ is a global variable created when the excuted the **_load_** command.
+```{r}
+summary(medianincome)
+```
+
+We also normalize the income by _Median.Income_.
+
+```{r}
+custdata$income.norm <- with(custdata, income/Median.Income)
+summary(custdata$income.norm)
+```
+
+####3.2.2 Converting age into ranges
+
+In the brks we have selected the range of interest. There are three range categories which are
+
++ 0-25
++ 25-65
++ 65-Inf
+
+```{r}
+brks <- c(0, 25, 65, Inf)
+```
+
+Next we cut the data into age ranges. The output of _cut_ is factor variable.
+
+```{r}
+custdata$age.range <- cut(custdata$age, breaks=brks, include.lowest=T)
+summary(custdata$age.range)
+```
+
+####3.2.3 NORMALIZATION AND RESCALING
+
+```{r}
+summary(custdata$age)
+```
+
+In this example we have normalized the _age_ variable. Less than 1 signifies very young customer.
+
+```{r}
+meanage <- mean(custdata$age)
+custdata$age.normalized <- custdata$age/meanage
+summary(custdata$age.normalized)
+
+```
+
+
+####3.2.4 Summarizing age
+
+Another way of normalizing the data is to use mean and standard deviation. This is especially useful when the data distribution is roughly symmetrical.
+
+* Customers less than -1 signifies customers youger than typical
+* Customers greater than 1 signify customers older than typical.
+
+```{r}
+meanage <- mean(custdata$age)
+stdage <- sd(custdata$age)
+custdata$age.normalized <- (custdata$age-meanage)/stdage
+summary(custdata$age.normalized)
+
+```
+

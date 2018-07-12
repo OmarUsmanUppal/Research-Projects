@@ -1,0 +1,109 @@
+
+Steps to Install Apache HIVE on Ubuntu 16.04
+
+Before Installations make sure of following commands
+to run before starting the installation
+
+============================================================
+Step -2 Be in Local User
+#sudo - uppal
+
+Step -1 Restart SSH Service
+#service sshd restart
+
+Step 1. Restart Apache Hadoop (In Case of Server Restart)
+#cd /usr/local/hadoop/hadoop-2.7.5/sbin
+#./start-all.sh
+#jps
+
+NOTE: MAKE SURE HADOOP IS RUNNING BEFORE STARTING HIVE installation
+else it wont work
+
+1. Download HIVE from the following Link
+Put Link Here
+
+2. Login with User-Other than root in which
+you have installed Apache Hadoop
+#su uppal
+
+3. Unzip the file
+# cd Desktop
+#tar -xvf apache-hive-1.2.2-bin.tar.gz 
+
+4. Create Directory
+#sudo mkdir /usr/lib/hive
+
+5. Move Hive-1.2.2 to hive
+#sudo mv apache-hive-1.2.2-bin /usr/lib/hive/apache-hive-1.2.2-bin
+
+6. Edit bashrc
+#getedit ~/.bashrc
+
+export HIVE_HOME=/usr/lib/hive/apache-hive-1.2.2-bin
+export PATH=$PATH:$HIVE_HOME/bin
+
+	export HBASE_HOME=/home/eudreka/apache-hive-1.2.1-bin
+	export PATH=$PATH:$HBASE_HOME/bin
+
+NOTE: Just paste last two lines at the end of bashrc file as we did for Hadoop
+
+#source ~/.bashrc
+
+7 Setting Hadoop_Path in HIVE config.sh
+cd  /usr/lib/hive/apache-hive-1.2.2-bin/bin
+sudo gedit hive-config.sh
+
+Go to the line where the following statements are written
+# Allow alternate conf dir location.
+HIVE_CONF_DIR="${HIVE_CONF_DIR:-$HIVE_HOME/conf"
+export HIVE_CONF_DIR=$HIVE_CONF_DIR
+export HIVE_AUX_JARS_PATH=$HIVE_AUX_JARS_PATH
+
+export HADOOP_HOME=/usr/local/hadoop/hadoop-2.7.5    (write the path where hadoop file is there)
+
+8 Create Hive directories
+#hadoop fs -mkdir -p /usr/hive/warehouse
+#hadoop fs -chmod g+w /usr/hive/warehouse
+
+9. Following commands were run but dont know the effect
+#hadoop fs -mkdir -p /tmp
+#hadoop fs -chmod g+w /tmp
+
+
+10. RUN HIVE
+cd  /usr/lib/hive/apache-hive-1.2.2-bin/bin
+hive
+
+11.
+cp /usr/lib/hive/apache-hive-1.2.2-bin/conf/hive-default.xml.template /usr/lib/hive/apache-hive-1.2.2-bin/conf/hive-site.xml
+cd /usr/lib/hive/apache-hive-1.2.2-bin/conf/
+
+gedit hive-site.xml
+
+<property>
+    <name>hive.metastore.local</name>
+    <value>TRUE</value>
+    <description>controls whether to connect to remove metastore server or open a new metastore server in Hive Client JVM</description>
+</property>
+
+<property>
+    <name>javax.jdo.option.ConnectionURL</name>
+    <value>jdbc:mysql://usr/lib/hive/apache-hive-1.2.2-bin/metastore_db? createDatabaseIfNotExist=true</value>
+    <description>JDBC connect string for a JDBC metastore</description>
+</property>
+
+<property>
+    <name>javax.jdo.option.ConnectionDriverName</name>
+    <value>com.mysql.jdbc.Driver</value>
+    <description>Driver class name for a JDBC metastore</description>
+</property>
+
+<property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>/usr/hive/warehouse</value>
+    <description>location of default database for the warehouse</description>
+ </property>
+
+
+cd /usr/lib/hive/apache-hive-1.2.2-bin/ $ bin/hive -f /home/hduser/sample.sql
+hive>> create database mydb;
